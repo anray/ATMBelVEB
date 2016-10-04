@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">ATMBelVEB</string>
     <string name="title_activity_maps">Map</string>
+    <string name="explain_geo_permissions">Вы хотите видеть банкоматы поблизости?</string>
+    <string name="snackbar_agree">Да</string>
+    <string name="snackbar_disagree">Нет</string>
+    <string name="open_app_settings_message">Открыть настройки и разрешить определение Местоположения?</string>
+    <string name="advice_where_grant_geo">Выберите разрешения и \nразрешите Местоположение</string>
+    <string name="geo_denied_notification">Вам не доступно определение \nВашего местоположения</string>
 </resources>
