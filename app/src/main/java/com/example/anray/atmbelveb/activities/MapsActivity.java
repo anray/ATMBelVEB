@@ -97,19 +97,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void setMapControls() {
-        mMap.setMyLocationEnabled(true);
+
+        try {
+            mMap.setMyLocationEnabled(true);
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
         mGoogleApiClient.connect();
     }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Log.d(TAG, "GPS");
-        mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        try {
+            mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
-        if (mLocation != null) {
-            LatLng latLng = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
-            Log.d(TAG, "GPS" + latLng.toString());
+            if (mLocation != null) {
+                LatLng latLng = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
+                Log.d(TAG, "GPS" + latLng.toString());
+            }
+        } catch (SecurityException e) {
+            e.printStackTrace();
         }
 
     }
@@ -145,7 +154,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         }
 
-
     }
 
     @Override
@@ -154,21 +162,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         switch (requestCode) {
             case LOCATION_PERMISSIONS_REQUEST_FIRST:
                 if (permissions.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    checkPermissionsSinceApi23(LOCATION_PERMISSIONS_REQUEST_FIRST);
+                    setMapControls();
                 } else if (permissions.length > 0 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
                     checkPermissionsSinceApi23(LOCATION_PERMISSIONS_REQUEST_SECOND);
                 }
                 break;
             case LOCATION_PERMISSIONS_REQUEST_SECOND:
                 if (permissions.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    checkPermissionsSinceApi23(LOCATION_PERMISSIONS_REQUEST_THIRD);
+                    setMapControls();
                 } else if (permissions.length > 0 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
                     showOpenAppSettingsMessage();
                 }
                 break;
             case LOCATION_PERMISSIONS_REQUEST_THIRD:
                 if (permissions.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    checkPermissionsSinceApi23(LOCATION_PERMISSIONS_REQUEST_THIRD);
+                    setMapControls();
                 } else if (permissions.length > 0 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
                     Toast toast = Toast.makeText(getApplicationContext(), R.string.geo_denied_notification, Toast.LENGTH_LONG);
                     TextView tv = (TextView) toast.getView().findViewById(android.R.id.message);
@@ -212,29 +220,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     tv.setGravity(Gravity.CENTER);
                 }
                 toast.show();
-
             }
         });
         snackbar.show();
 
     }
 
-
-    private boolean wasPermissionDeniedBefore() {
-        return ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
-    }
-
-    private boolean hasGeoPermission() {
-        return ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private void requestGeoPermission(int requestCode) {
-        ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                requestCode);
-    }
-
     private void openAppSettings() {
+
         Intent appSettingsIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                 Uri.parse("package:" + getPackageName()));
         startActivityForResult(appSettingsIntent, LOCATION_PERMISSIONS_REQUEST_THIRD);
@@ -251,6 +244,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
+
+    private boolean wasPermissionDeniedBefore() {
+        return ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
+    }
+
+    private boolean hasGeoPermission() {
+        return ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestGeoPermission(int requestCode) {
+        ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                requestCode);
+    }
+
+
 
 
 }
